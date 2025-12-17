@@ -5,7 +5,10 @@
 
 void draw_text(cairo_t *cr, double x, double y, const char *text, double size, int bold) {
     cairo_save(cr);
-    cairo_set_source_rgb(cr, 0, 0, 0);
+    // Default text color is white for dark theme, unless caller set it (but here we reset)
+    // To support caller setting color, we should probably not set it here, or have a theme arg.
+    // For now, hardcode white.
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
     cairo_select_font_face(cr, "Sans",
         CAIRO_FONT_SLANT_NORMAL,
         bold ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
@@ -81,13 +84,19 @@ void draw_component(cairo_t *cr, Component *comp) {
         case COMP_SOURCE:
             cairo_rectangle(cr, -comp->width/2, -comp->height/2, comp->width, comp->height);
             cairo_fill_preserve(cr);
-            cairo_set_source_rgb(cr, 0, 0, 0);
+            cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // White border
             cairo_set_line_width(cr, 1.0);
             cairo_stroke(cr);
             break;
 
         case COMP_MIRROR:
             cairo_set_line_width(cr, 3.0);
+            // If color is too dark, lighten it? Or just assume caller provides good colors.
+            // Mirrors are often gray. Let's force a lighter gray outline if needed or just use current.
+            // But if it's black/dark gray it won't show.
+            // Let's rely on the passed color, but if it was intended for white bg it might be dark.
+            // If the color passed is dark, we might want to invert or lighten.
+            // For now, assume caller fixes component colors or they are already distinct.
             cairo_move_to(cr, -comp->width/2, 0);
             cairo_line_to(cr, comp->width/2, 0);
             cairo_stroke(cr);
@@ -100,7 +109,7 @@ void draw_component(cairo_t *cr, Component *comp) {
             cairo_restore(cr);
             cairo_set_source_rgba(cr, 0.6, 0.8, 1.0, 0.5); // Light blue glass
             cairo_fill_preserve(cr);
-            cairo_set_source_rgb(cr, 0.0, 0.0, 0.5);
+            cairo_set_source_rgb(cr, 0.8, 0.8, 1.0); // Light blue outline
             cairo_set_line_width(cr, 1.0);
             cairo_stroke(cr);
             break;
@@ -129,7 +138,7 @@ void draw_component(cairo_t *cr, Component *comp) {
             cairo_fill(cr);
             cairo_move_to(cr, -comp->width/2, comp->height/2);
             cairo_line_to(cr, comp->width/2, -comp->height/2);
-            cairo_set_source_rgb(cr, 0, 0, 0);
+            cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // White line
             cairo_stroke(cr);
             break;
 

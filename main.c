@@ -23,8 +23,13 @@ static void draw_ir_bench(cairo_t *cr) {
     draw_beam(cr, ao188_start, oap1_pos, 0.5, 0.0, 0.5, 20.0); // Purple beam
     draw_text(cr, 30, 540, "F/14 beam from AO188", 12, 0);
 
+    // Integrating Sphere (Below AO188 input)
+    Component int_sphere = {COMP_BOX, {60, 650}, 40, 40, 0, "Integrating sphere", {0.3, 0.3, 0.3}};
+    draw_component(cr, &int_sphere);
+    draw_arrow(cr, (Point){100, 650}, (Point){150, 650}, 0.8, 0.8, 0.0);
+
     // OAP1
-    Component oap1 = {COMP_OAP, oap1_pos, 40, 10, 45, "OAP1", {0.5, 0.5, 0.5}};
+    Component oap1 = {COMP_OAP, oap1_pos, 40, 10, 45, "OAP1", {0.8, 0.8, 0.8}};
     draw_component(cr, &oap1);
 
     // Beam to DM
@@ -35,6 +40,10 @@ static void draw_ir_bench(cairo_t *cr) {
     Component dm = {COMP_DM, dm_pos, 40, 10, -45, "Deformable Mirror", {0.8, 0.8, 0.0}};
     draw_component(cr, &dm);
 
+    // Internal NIR Camera (Below DM)
+    Component nir_cam = {COMP_BOX, {150, 750}, 60, 40, 0, "Internal NIR camera", {0.2, 0.2, 0.2}};
+    draw_component(cr, &nir_cam);
+
     // Beam to PIAA
     Point piaa_pos = {400, 650};
     draw_beam(cr, dm_pos, piaa_pos, 0.5, 0.0, 0.5, 15.0);
@@ -42,6 +51,9 @@ static void draw_ir_bench(cairo_t *cr) {
     // Polarizer, Pupil mask (simplified as boxes/lines on path)
     Component polarizer = {COMP_FILTER, {250, 650}, 10, 20, 90, "Polarizer", {0.8, 0.4, 0.0}};
     draw_component(cr, &polarizer);
+
+    Component pupil_mask_wheel = {COMP_FILTER, {280, 650}, 5, 25, 90, "Pupil mask wheel", {0.8, 0.4, 0.0}};
+    draw_component(cr, &pupil_mask_wheel);
 
     // PIAA Lenses
     Component piaa = {COMP_LENS, piaa_pos, 30, 10, 90, "PIAA", {0.6, 0.8, 1.0}};
@@ -108,6 +120,22 @@ static void draw_ir_bench(cairo_t *cr) {
     // Connect LLOWFS (approximate path)
     draw_beam(cr, (Point){600, 650}, llowfs.pos, 1.0, 0.6, 0.6, 2.0); // Thin line for pickoff
 
+    // GLINT Path (Up from Photonic pickoff)
+    draw_arrow(cr, (Point){600, 650}, (Point){600, 600}, 0.8, 0.2, 0.2);
+    draw_text(cr, 580, 590, "To GLINT", 10, 0);
+
+    // REACH Path (Top Right of IR Bench)
+    draw_arrow(cr, (Point){900, 500}, (Point){950, 500}, 0.8, 0.5, 0.2);
+    draw_text(cr, 960, 500, "To REACH", 10, 0);
+    draw_text(cr, 960, 515, "switchyard", 10, 0);
+    Component mcf = {COMP_BOX, {925, 500}, 30, 10, 0, "MCF", {0.7, 0.7, 0.0}};
+    draw_component(cr, &mcf);
+
+    // Focal Plane Camera (Near Field Stop)
+    Component focal_cam = {COMP_BOX, {750, 750}, 40, 30, 0, "Focal plane", {0.2, 0.2, 0.2}};
+    draw_component(cr, &focal_cam);
+    draw_text(cr, 750, 780, "camera", 10, 0);
+
     // C-RED ONE Spectrograph (Bottom Left)
     Component cred_one = {COMP_BOX, {200, 1000}, 80, 50, 0, "C-RED ONE", {0.8, 0.8, 0.8}};
     draw_component(cr, &cred_one);
@@ -157,6 +185,13 @@ static void draw_visible_bench(cairo_t *cr) {
     Component periscope = {COMP_BOX, {50, 300}, 50, 50, 0, "Periscope", {0.2, 0.4, 0.8}};
     draw_component(cr, &periscope);
 
+    // Pupil Viewing Camera (Top Left Branch)
+    Point pupil_view_split = {150, 300};
+    draw_beam(cr, (Point){50, 300}, (Point){150, 200}, 0.0, 1.0, 0.0, 4.0);
+    Component pupil_cam = {COMP_BOX, {150, 200}, 40, 30, 0, "Pupil viewing", {0.2, 0.2, 0.2}};
+    draw_component(cr, &pupil_cam);
+    draw_text(cr, 140, 240, "camera", 10, 0);
+
     // Main Green Beam from Periscope
     Point peri_pos = {50, 300};
     Point wfs_bs_actual = {250, 300};
@@ -175,6 +210,10 @@ static void draw_visible_bench(cairo_t *cr) {
     // Continue right to VAMPIRES
     Point vamp_split_pos = {450, 300};
     draw_beam(cr, wfs_bs_actual, vamp_split_pos, 0.0, 1.0, 0.0, 10.0);
+
+    // Field Stops & LP (between WFS BS and VAMPIRES Splitter)
+    Component field_stops_vis = {COMP_FILTER, {350, 300}, 5, 20, 90, "Field stops", {0.8, 0.0, 0.0}};
+    draw_component(cr, &field_stops_vis);
 
     // VAMPIRES/FIRST Splitter
     Component vamp_split = {COMP_SPLITTER, vamp_split_pos, 20, 5, 45, "VAMPIRES/FIRST", {0.7, 0.7, 0.7}};
@@ -197,6 +236,15 @@ static void draw_visible_bench(cairo_t *cr) {
     draw_beam(cr, (Point){800, 300}, sel_bs_pos, 0.0, 1.0, 0.0, 10.0);
     Component sel_bs = {COMP_SPLITTER, sel_bs_pos, 20, 20, 0, "Selectable BS", {0.5, 0.5, 1.0}};
     draw_component(cr, &sel_bs);
+
+    // Components before cameras
+    // MBI Dichroics/Mirror
+    Component mbi = {COMP_MIRROR, {950, 275}, 30, 5, 45, "MBI", {0.6, 0.6, 1.0}};
+    draw_component(cr, &mbi);
+
+    // Differential Filter Wheel (Near Cam 1)
+    Component diff_fw = {COMP_FILTER, {1050, 250}, 10, 30, 0, "Diff. FW", {0.4, 0.4, 0.4}};
+    draw_component(cr, &diff_fw);
 
     // To Cam 1
     draw_beam(cr, sel_bs_pos, vamp_cam1_pos, 0.0, 1.0, 0.0, 8.0);
@@ -221,6 +269,17 @@ static void draw_calibration_source(cairo_t *cr) {
 
     Component red_laser = {COMP_BOX, {80, 140}, 120, 30, 0, "Red alignment laser", {1.0, 1.0, 1.0}};
     draw_component(cr, &red_laser);
+
+    // Tunable Filter
+    Component tun_filter = {COMP_BOX, {250, 40}, 60, 20, 0, "Tunable filter", {0.9, 0.9, 0.9}};
+    draw_component(cr, &tun_filter);
+
+    // VIS-IR ND filters & Narrowband filters (Wheels)
+    Component nd_filter = {COMP_FILTER, {350, 90}, 5, 20, 90, "ND Filters", {0.5, 0.5, 0.5}};
+    draw_component(cr, &nd_filter);
+
+    Component nb_filter = {COMP_FILTER, {380, 90}, 5, 20, 90, "NB Filters", {0.5, 0.5, 0.5}};
+    draw_component(cr, &nb_filter);
 
     // Fibers (Yellow) to combiner
     Point p1 = {140, 40};
@@ -262,6 +321,16 @@ static void draw_first_recombination_bench(cairo_t *cr) {
     draw_component(cr, &chip);
     draw_beam(cr, (Point){690, 40}, (Point){770, 40}, 1.0, 0.8, 0.0, 2.0);
 
+    // V-groove, Wollaston, VPH (between Chip and Camera)
+    Component v_groove = {COMP_FILTER, {900, 40}, 5, 20, 90, "V-groove", {0.6, 0.6, 0.6}};
+    draw_component(cr, &v_groove);
+
+    Component wollaston = {COMP_PRISM, {950, 40}, 20, 20, 0, "Wollaston", {0.8, 0.8, 1.0}};
+    draw_component(cr, &wollaston);
+
+    Component vph = {COMP_FILTER, {1000, 40}, 5, 20, 90, "VPH", {0.4, 0.4, 0.4}};
+    draw_component(cr, &vph);
+
     Component sci_cam1 = {COMP_BOX, {1100, 40}, 40, 40, 0, "Sci Cam", {0.1, 0.1, 0.1}};
     draw_component(cr, &sci_cam1);
     draw_beam(cr, (Point){830, 40}, (Point){1080, 40}, 0.6, 0.6, 1.0, 5.0); // Light blue beam
@@ -280,11 +349,12 @@ static void draw_first_recombination_bench(cairo_t *cr) {
 }
 
 static void draw_function(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer user_data) {
-    // Clear background
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    // Clear background (Dark)
+    cairo_set_source_rgb(cr, 0.1, 0.1, 0.1);
     cairo_paint(cr);
 
-    // Draw title
+    // Draw title (White)
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
     draw_text(cr, 10, 30, "SCExAO Beam Train Schematic", 24, 1);
 
     draw_calibration_source(cr);
